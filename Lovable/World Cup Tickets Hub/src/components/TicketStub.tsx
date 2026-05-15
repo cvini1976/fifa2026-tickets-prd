@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import QRCode from 'qrcode';
 import { Trophy, MapPin, Calendar, Clock, User, ShieldCheck } from 'lucide-react';
+import { localFlag } from '@/lib/localFlag';
 
 export interface TicketData {
   ticketId: string;
@@ -62,6 +63,9 @@ export const TicketStub: React.FC<TicketStubProps> = ({
   const qrUrl = buildVerifyUrl(ticket, siteOrigin);
   const formattedDate = format(new Date(ticket.date), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR });
   const purchaseDateFormatted = format(ticket.purchaseDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+  // Story 0.11 — bandeiras servidas localmente (evita canvas-taint no PDF).
+  const homeFlagSrc = localFlag(ticket.homeFlag);
+  const awayFlagSrc = localFlag(ticket.awayFlag);
 
   // Renderiza o QR como GRID DE DIVS (cada célula = div com background).
   // Divs são capturados perfeitamente pelo html2canvas em qualquer cenário —
@@ -183,11 +187,10 @@ export const TicketStub: React.FC<TicketStubProps> = ({
           }}
         >
           <div style={{ textAlign: 'center', flex: 1 }}>
-            {ticket.homeFlag?.startsWith('http') ? (
+            {homeFlagSrc.includes('/') ? (
               <img
-                src={ticket.homeFlag}
+                src={homeFlagSrc}
                 alt={ticket.homeTeam}
-                crossOrigin="anonymous"
                 style={{
                   width: 64,
                   height: 44,
@@ -229,11 +232,10 @@ export const TicketStub: React.FC<TicketStubProps> = ({
           </div>
 
           <div style={{ textAlign: 'center', flex: 1 }}>
-            {ticket.awayFlag?.startsWith('http') ? (
+            {awayFlagSrc.includes('/') ? (
               <img
-                src={ticket.awayFlag}
+                src={awayFlagSrc}
                 alt={ticket.awayTeam}
-                crossOrigin="anonymous"
                 style={{
                   width: 64,
                   height: 44,

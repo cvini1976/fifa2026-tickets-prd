@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { QrCode, MapPin, Calendar, Clock, Users } from 'lucide-react';
+import { localFlag } from '@/lib/localFlag';
 
 export interface TicketData {
   ticketId: string;
@@ -45,11 +46,10 @@ export const TicketPDF: React.FC<TicketPDFProps> = ({ ticket, innerRef }) => {
       <div className="bg-gradient-to-r from-[#8B0000] to-[#B22222] text-white p-6 rounded-lg mb-6">
         <div className="flex items-center justify-center gap-8">
           <div className="text-center">
-            <img 
-              src={ticket.homeFlag} 
-              alt={ticket.homeTeam} 
+            <img
+              src={localFlag(ticket.homeFlag)}
+              alt={ticket.homeTeam}
               className="w-16 h-12 object-cover rounded shadow-md mx-auto"
-              crossOrigin="anonymous"
             />
             <p className="text-xl font-bold mt-2">{ticket.homeTeam}</p>
           </div>
@@ -57,11 +57,10 @@ export const TicketPDF: React.FC<TicketPDFProps> = ({ ticket, innerRef }) => {
             <span className="text-2xl font-light">VS</span>
           </div>
           <div className="text-center">
-            <img 
-              src={ticket.awayFlag} 
-              alt={ticket.awayTeam} 
+            <img
+              src={localFlag(ticket.awayFlag)}
+              alt={ticket.awayTeam}
               className="w-16 h-12 object-cover rounded shadow-md mx-auto"
-              crossOrigin="anonymous"
             />
             <p className="text-xl font-bold mt-2">{ticket.awayTeam}</p>
           </div>

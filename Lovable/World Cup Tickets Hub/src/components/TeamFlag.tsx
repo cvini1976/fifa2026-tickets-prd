@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { localFlag } from '@/lib/localFlag';
 
 interface TeamFlagProps {
   flag: string;
@@ -23,13 +24,14 @@ const emojiSizeClasses = {
 };
 
 export const TeamFlag: React.FC<TeamFlagProps> = ({ flag, name, size = 'md', className }) => {
-  const isFlagUrl = flag.startsWith('http');
+  const src = localFlag(flag);          // Story 0.11 — flag local same-origin
+  const isFlagUrl = src.includes('/');
 
   if (isFlagUrl) {
     return (
-      <img 
-        src={flag} 
-        alt={`Bandeira ${name}`} 
+      <img
+        src={src}
+        alt={`Bandeira ${name}`}
         className={cn(sizeClasses[size], 'object-cover rounded', className)}
       />
     );
