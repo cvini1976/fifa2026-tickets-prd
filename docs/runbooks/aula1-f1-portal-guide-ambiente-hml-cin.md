@@ -271,16 +271,26 @@ A Function precisa de um Storage para estado interno (triggers, locks, logs do h
 5. **Monitoring:** Application Insights = **Yes** → `<seu-appi>`.
 6. **`Review + create`** → **`Create`**.
 
-> **Alternativa — criar a Function App via Cloud Shell (PowerShell).** Se preferir CLI ao Portal, abra o **Cloud Shell** no modo **PowerShell** e rode o bloco abaixo (preencha as suas variáveis). Pré-requisito: o **App Service plan** (Fase 3), o **Storage** (Fase 5) e o **Application Insights** (Fase 6) já criados.
-> ```powershell
-> # Preencha com os SEUS nomes (mesmos da tabela de convenção)
-> $rg      = "<seu-rg>"
-> $plano   = "<seu-plano>"     # App Service plan B1 Windows (Fase 3)
-> $storage = "<seu-storage>"   # Storage Account (Fase 5)
-> $appi    = "<seu-appi>"      # Application Insights (Fase 6)
-> $func    = "<seu-func>"      # nome global único da Function App
+> **Alternativa — criar a Function App via Cloud Shell (PowerShell).** Se preferir CLI ao Portal, abra o **Cloud Shell** no modo **PowerShell** e rode o bloco abaixo. Pré-requisito: o **App Service plan** (Fase 3), o **Storage** (Fase 5) e o **Application Insights** (Fase 6) já criados.
 >
-> # Cria a Function App no plano B1 (Windows, .NET 8 isolated, Functions v4)
+> Em vez de digitar os nomes à mão (e arriscar erro de digitação), **descubra** automaticamente os nomes dos recursos já criados no seu RG e confira antes de criar a Function. Você só precisa digitar **dois** valores: o **RG** e o **nome novo** da Function App.
+> ```powershell
+> # --- Você digita só estes dois ---
+> $rg   = "<seu-rg>"        # o RG onde você criou tudo (Fases 1-6)
+> $func = "<seu-func>"      # nome GLOBAL único da Function App (ainda NÃO existe — você escolhe)
+>
+> # --- Descobre os nomes dos recursos existentes no RG ---
+> $loc     = az group show -n $rg --query location -o tsv
+> $plano   = az appservice plan list -g $rg --query "[?sku.tier=='Basic'][0].name" -o tsv
+> $storage = az storage account list -g $rg --query "[0].name" -o tsv
+> $appi    = az resource list -g $rg --resource-type microsoft.insights/components --query "[0].name" -o tsv
+> $sql     = az sql server list -g $rg --query "[0].name" -o tsv
+> $sb      = az servicebus namespace list -g $rg --query "[0].name" -o tsv
+>
+> # --- Confere o que foi descoberto ANTES de criar (jeito PowerShell, sem printf) ---
+> [pscustomobject]@{ RG=$rg; LOC=$loc; PLAN=$plano; STORAGE=$storage; APPI=$appi; SQL=$sql; SB=$sb } | Format-List
+>
+> # --- Cria a Function App no plano B1 (Windows, .NET 8 isolated, Functions v4) ---
 > az functionapp create `
 >   --resource-group $rg `
 >   --name $func `
@@ -303,7 +313,7 @@ A Function precisa de um Storage para estado interno (triggers, locks, logs do h
 >   --name scm --parent "sites/$func" `
 >   --set properties.allow=true
 > ```
-> Esse bloco cobre, de uma vez, a criação (7.1) **e** as configurações de **Always On** (7.3) e **SCM basic-auth** (7.4). Se for **Opção A (SQL privado)**, ainda faça a VNet integration da 7.2 (abaixo).
+> A etapa de **descoberta** (`az ... list --query`) só funciona se os recursos das Fases 3/5/6 **já existirem** no `$rg` — ela apenas **lê** os nomes; `$func` é o único que você escolhe (a Function ainda não existe). Confira a saída do `Format-List`: se algum campo vier **vazio**, o recurso correspondente não está no RG (revise a fase). Esse bloco cobre, de uma vez, a criação (7.1) **e** as configurações de **Always On** (7.3) e **SCM basic-auth** (7.4). Se for **Opção A (SQL privado)**, ainda faça a VNet integration da 7.2 (abaixo).
 
 ### 7.2 (Somente Opção A — SQL privado) Ligar a Function na VNet
 
